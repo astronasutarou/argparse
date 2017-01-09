@@ -1,3 +1,10 @@
+/***
+ * A Simple Argument Parse Library for C++
+ *
+ * This code is licensed under a CC4.0-BY-SA.
+ * https://creativecommons.org/licenses/by-sa/4.0/
+ */
+
 #include <cstdio>
 #include <cstdint>
 #include <cstdlib>
@@ -379,9 +386,6 @@ namespace argparse {
 
     template <class T>
     const std::vector<T> get(const arg&) const;
-    template <class T>
-    const std::vector<T> operator[](const arg& s) const
-    { return get<T>(s); }
 
     const bool find(const arg& s) const
     { return (_map.find(s) != _map.end()); }
