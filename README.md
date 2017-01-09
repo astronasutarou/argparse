@@ -52,7 +52,7 @@ main(int argc, char** argv)
   }
 
   // The parsed argument is available via get() method.
-  // The argument is always given as std::vector<T>.
+  // The argument is always given as a std::vector<T> object.
   auto v_arg1 = parser.get<int64_t>("arg1");
   for (auto& v: v_arg1) {
     std::cout << "  arg1: " << v << std::endl;
