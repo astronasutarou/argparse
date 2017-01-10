@@ -227,7 +227,6 @@ namespace argparse {
   void
   parameter::explain(void) const
   {
-
     printf("  %s [%s", name().c_str(), describe_type());
     for (auto i=1; i<nargs(); i++)
       printf(",%s", describe_type());
@@ -245,8 +244,8 @@ namespace argparse {
         n++;
         if (n==80) { n=0; printf("\n"); }
       }
+      printf("\n");
     }
-    printf("\n");
   }
 
 
@@ -356,8 +355,8 @@ namespace argparse {
         n++;
         if (n==80) { n=0; printf("\n"); }
       }
+      printf("\n");
     }
-    printf("\n");
   }
 
   typedef std::vector<value> values;
@@ -533,19 +532,18 @@ namespace argparse {
           const auto& vtrue = values{value(value_type::arg_boolean, "true")};
           values v;
 
+          if (vp == _arguments.end()) break;
           if (o==*vp) {
             _updated = true;
+            vp++;
             if (size == 0) {
               _map.insert(argument(name,vtrue));
-              vp++;
             } else if (size >= 1) {
-              vp++;
               for (auto i=0; i<size; i++) {
                 v.push_back(value(type, *vp)); vp++;
               }
               _map.insert(argument(name,v));
             } else if (size == variable_args) {
-              vp++;
               while (vp != _arguments.end()) {
                 v.push_back(value(type, *vp)); vp++;
               }
@@ -560,13 +558,13 @@ namespace argparse {
         }
       }
     }
-
     {
       auto vp = _remaining.begin();
       auto ip = _parse_parameters.begin();
       while (ip != _parse_parameters.end()) {
         if (vp == _remaining.end())
           throw std::runtime_error("insufficient number of arguments");
+
         const auto& size = ip->nargs();
         const auto& name = ip->name();
         const auto& type = ip->type();
