@@ -244,7 +244,7 @@ namespace argparse {
         n++;
         if (n==80) { n=0; printf("\n"); }
       }
-      printf("\n");
+      if (n!=0) printf("\n");
     }
   }
 
@@ -355,7 +355,7 @@ namespace argparse {
         n++;
         if (n==80) { n=0; printf("\n"); }
       }
-      printf("\n");
+      if (n!=0) printf("\n");
     }
   }
 
