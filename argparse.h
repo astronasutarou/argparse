@@ -406,11 +406,11 @@ namespace argparse {
 
     void add_option(const arg& dir, const arg& name,
                     const arg& com = "") {
-      add_option(dir, name, value_type::arg_boolean, 1, com);
+      add_option(dir, name, value_type::arg_boolean, 0, com);
     }
     void add_option(const std::vector<arg>& dirs, const arg& name,
                     const arg& com = "") {
-      add_option(dirs, name, value_type::arg_boolean, 1, com);
+      add_option(dirs, name, value_type::arg_boolean, 0, com);
     }
     void add_option(const arg& dir, const arg& name,
                     const value_type t, const arg& com="") {
