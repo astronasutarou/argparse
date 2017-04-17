@@ -98,4 +98,4 @@ g++ -std=c++11 -o sample sample.cc
 
 
 ## License
-The codes in this repository are licensed under a [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0/).
+The codes in this repository are licensed under the [MIT License](https://opensource.org/licenses/mit-license.php).
