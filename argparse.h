@@ -22,6 +22,7 @@ namespace argparse {
   using std::regex_constants::icase;
   constexpr int16_t variable_args = -1;
   typedef std::string arg;
+  typedef std::vector<argparse::arg> args;
 
   enum class value_type {
     arg_null, arg_boolean, arg_integer, arg_float, arg_string };
