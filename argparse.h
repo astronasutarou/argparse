@@ -74,6 +74,18 @@ namespace argparse {
     return convert_integer();
   }
   template <> inline
+  const uint16_t value::get<uint16_t>(void) const {
+    return (uint16_t)convert_integer();
+  }
+  template <> inline
+  const uint32_t value::get<uint32_t>(void) const {
+    return (uint32_t)convert_integer();
+  }
+  template <> inline
+  const uint64_t value::get<uint64_t>(void) const {
+    return (uint64_t)convert_integer();
+  }
+  template <> inline
   const float value::get<float>(void) const {
     return convert_float();
   }
