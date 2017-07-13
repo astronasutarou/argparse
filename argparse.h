@@ -1,8 +1,10 @@
 /***
- * A Simple Argument Parse Library for C++
+ * @brief A Simple Argument Parser Library for C++
+ * @author Ryou Ohsawa
+ * @date 2017
  *
- * This code is licensed under a CC4.0-BY-SA.
- * https://creativecommons.org/licenses/by-sa/4.0/
+ * This code is licensed under the MIT License.
+ * https://opensource.org/licenses/MIT
  */
 
 #include <cstdio>
