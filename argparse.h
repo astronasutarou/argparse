@@ -58,7 +58,7 @@ namespace argparse {
      * @param[in] type The type of a value.
      * @exception std::runtime_error is thrown if the type is wrong.
      */
-    value(const value_type type): value(t, "") { }
+    value(const value_type type): value(type, "") { }
     /**
      * @brief Initialize a container with a type and an element
      * @param[in] type The type of value.
@@ -295,7 +295,7 @@ namespace argparse {
      * @brief Return the current `value_type` as a text.
      * @return A C-type text explaining the current `value_type`.
      */
-    const char* describe_type(void) const = 0;
+    const char* describe_type(void) const;
 
     /**
      * @brief Check the equality of two instances.
@@ -313,11 +313,12 @@ namespace argparse {
      */
     virtual void explain(FILE* output) const = 0;
 
-  private:
+  protected:
     value_type _type; /**< The type of arguments */
     int16_t _nargs;   /**< The number of arguments */
     arg _name;        /**< The name of the instance */
     arg _comment;     /**< The description of the instance */
+  private:
   };
 
   const char*
@@ -349,7 +350,7 @@ namespace argparse {
      */
     positional_argument(const arg& name, const value_type type,
                         const int16_t n=1)
-      : abstract_argument(name, t, n, "") {}
+      : abstract_argument(name, type, n, "") {}
     /**
      * @brief Create an instance for multiple elements with a comment.
      * @param[in] name The name of the instance.
@@ -360,7 +361,7 @@ namespace argparse {
      */
     positional_argument(const arg& name, const value_type type,
                         const int16_t n, const arg& com)
-      : abstract_argument(name, t, n, com) {}
+      : abstract_argument(name, type, n, com) {}
     /**
      * @brief Create an instance for a single element with a comment.
      * @param[in] name The name of the instance.
@@ -370,7 +371,7 @@ namespace argparse {
      */
     positional_argument(const arg& name, const value_type type,
                         const arg& com)
-      : abstract_argument(name, t, 1, com) {}
+      : abstract_argument(name, type, 1, com) {}
 
     /**
      * @brief Check the equality of two argparse::positional_argument's.
@@ -396,7 +397,7 @@ namespace argparse {
   };
 
   void
-  positional_argument::format(FILE* output=stdout) const
+  positional_argument::format(FILE* output) const
   {
     if (nargs() != 0) {
       if (nargs() > 1) {
@@ -414,7 +415,7 @@ namespace argparse {
   }
 
   void
-  positional_argument::explain(FILE* output=stdout) const
+  positional_argument::explain(FILE* output) const
   {
     fprintf(output,"  %s [%s", name().c_str(), describe_type());
     for (auto i=1; i<nargs(); i++)
@@ -479,7 +480,7 @@ namespace argparse {
      */
     optional_argument(const arg& dir, const arg& name,
                       const value_type type, const int16_t n = 1)
-      : optional_argument(dir, name, t, n, "")
+      : optional_argument(dir, name, type, n, "")
     { }
 
     /**
@@ -492,7 +493,7 @@ namespace argparse {
      */
     optional_argument(const std::vector<arg>& dirs,
            const arg& name, const value_type type, const int16_t n = 1)
-      : optional_argument(dirs, name, t, n, "")
+      : optional_argument(dirs, name, type, n, "")
     { }
 
     /**
@@ -507,7 +508,7 @@ namespace argparse {
     optional_argument(const arg& dir,
            const arg& name, const value_type type, const int16_t n,
            const arg& com)
-      : _type(type),_nargs(n),_name(name),_comment(com)
+      : abstract_argument(name, type, n, com)
     { _optseqs.push_back(dir); }
 
     /**
@@ -522,7 +523,7 @@ namespace argparse {
     optional_argument(const std::vector<arg>& dirs,
            const arg& name, const value_type type, const int16_t n,
            const arg& com)
-      : _type(type),_nargs(n),_name(name),_comment(com)
+      : abstract_argument(name, type, n, com)
     { for (auto d : dirs) _optseqs.push_back(d); }
 
     /**
@@ -532,15 +533,15 @@ namespace argparse {
 
     /**
      * @brief Check the equality of two argparse::optional_argument's.
-     * @return Zero if the instances are identical.
+     * @return Unity if the instances are identical.
      *
      * @note Instances which have the same directives are recognized
      * as the identical. The values in the instances are not checked.
      */
-    bool operator==(const arg& str) const {
+    int operator==(const arg& str) const {
       for (auto d : _optseqs)
-        if (d.compare(str) == 0) return true;
-      return false;
+        if (d.compare(str) == 0) return 1;
+      return 0;
     }
 
     /**
@@ -574,7 +575,7 @@ namespace argparse {
   }
 
   void
-  optional_argument::format(FILE* output=stdout) const
+  optional_argument::format(FILE* output) const
   {
     fprintf(output,"[");
     if (_optseqs.size()>1) fprintf(output,"{");
@@ -595,7 +596,7 @@ namespace argparse {
   }
 
   void
-  optional_argument::explain(FILE* output=stdout) const
+  optional_argument::explain(FILE* output) const
   {
     fprintf(output,"  ");
     show_option();
@@ -810,7 +811,7 @@ namespace argparse {
      */
     void add_option(const arg& dir, const arg& name,
                     const value_type type, const arg& com="") {
-      add_option(dir, name, t, 1, com);
+      add_option(dir, name, type, 1, com);
     }
     /**
      * @brief Add an optional argument with a element.
@@ -821,7 +822,7 @@ namespace argparse {
      */
     void add_option(const std::vector<arg>& dirs, const arg& name,
                     const value_type type, const arg& com="") {
-      add_option(dirs, name, t, 1, com);
+      add_option(dirs, name, type, 1, com);
     }
     /**
      * @brief Add an optional argument with elements.
@@ -871,7 +872,7 @@ namespace argparse {
 
 
   void
-  argparse::format(FILE* output=stdout) const
+  argparse::format(FILE* output) const
   {
     fprintf(output,"%s ", _appname.c_str());
     for (auto o : _parse_options) o.format();
@@ -880,7 +881,7 @@ namespace argparse {
   }
 
   void
-  argparse::explain(FILE* output=stdout) const
+  argparse::explain(FILE* output) const
   {
     if (_parse_parameters.size()>0) {
       fprintf(output,"\nArguments\n");
@@ -893,8 +894,7 @@ namespace argparse {
   }
 
   void
-  argparse::show_help(FILE* output=stdout
-                      const bool simple = false) const
+  argparse::show_help(FILE* output, const bool simple) const
   {
     if (_description.size() > 0)
       fprintf(output,"%s\n\n", _description.c_str());
@@ -904,7 +904,7 @@ namespace argparse {
   }
 
   void
-  argparse::display_status(FILE* output=stdout) const
+  argparse::display_status(FILE* output) const
   {
     fprintf(output,"# input arguments:");
     for (auto s : _arguments) fprintf(output," %s", s.c_str());
@@ -938,9 +938,58 @@ namespace argparse {
     }
   }
 
+  template <class T>
+  const std::vector<T>
+  argparse::getall(const arg& name) const
+  {
+    if (!_completed)
+      throw std::runtime_error("arguments are not parsed.");
+
+    std::vector<T> retval;
+    if (_map.find(name) == _map.end())
+      throw std::runtime_error("argument not found.");
+    auto& varr = _map.at(name);
+    for (auto& p : varr)
+      retval.push_back(p.get<T>());
+    return retval;
+  }
+
+  template <class T>
+  const std::vector<T>
+  argparse::getall(const arg& name, const T& dummy) const
+  {
+    try {
+      return getall<T>(name);
+    } catch (std::exception e) {
+      return std::vector<T>({dummy});
+    }
+  }
+
+  template <class T>
+  const T argparse::get(const arg& name) const
+  {
+    if (!_completed)
+      throw std::runtime_error("arguments are not parsed.");
+
+    if (_map.find(name) == _map.end())
+      throw std::runtime_error("argument not found.");
+    auto& varr = _map.at(name);
+    return varr[0].get<T>();;
+  }
+
+  template <class T>
+  const T argparse::get(const arg& name, const T& dummy) const
+  {
+    try {
+      return argparse::get<T>(name);
+    } catch (std::runtime_error e) {
+      return dummy;
+    }
+  }
+
   void
-  argparse::parse(const bool help_on_error = true,
-                  const bool show_help_and_exit = true)
+  argparse::parse(const bool help_on_error,
+                  const bool show_help_and_exit)
   {
     std::vector<arg> _remaining;
 
@@ -1025,14 +1074,14 @@ namespace argparse {
        * are enabled.
        */
       _completed = true;
-    } catch (std::exception e) {
+    } catch (std::runtime_error e) {
       /**
        * If `help_on_error` is set `true`, `parse()` function catches any
        * exception, displays a detailed help message, and exits.
        */
       if (help_on_error) {
-        argparse::show_help(stderr, true);
-        fprintf(stderr, "error: %s\n", e.what());
+        show_help(stderr, false);
+        fprintf(stderr, "\nerror: %s\n", e.what());
         exit(EXIT_FAILURE);
       }
       throw;
@@ -1046,73 +1095,11 @@ namespace argparse {
      * always displays a help message and exits. Thus, using a positional
      * argument with the name of `help` is not recommended.
      */
-    if (show_help_and_exit && argparse::get<bool>("help", false)) {
-      argparse::show_help(stderr, true);
+    if (show_help_and_exit && get<bool>(std::string("help"), false)) {
+      show_help(stderr, false);
       exit(EXIT_SUCCESS);
     }
-
   }
-
-  template <class T>
-  T argparse::get(const arg& name) const
-  { return argparse::getall<T>(name)[0]; }
-  template <> const std::vector<bool>  argparse::get(const arg&) const;
-  template <> const std::vector<int64_t>  argparse::get(const arg&) const;
-  template <> const std::vector<double>  argparse::get(const arg&) const;
-  template <> const std::vector<arg>  argparse::get(const arg&) const;
-
-  template <class T>
-  T argparse::get(const arg& name, const T& dummy) const
-  {
-    try {
-      return argparse::getall<T>(name)[0];
-    } catch (std::runtime_error e) {
-      return dummy;
-    }
-  }
-  template <> const std::vector<bool>
-  argparse::get(const arg&,const T&) const;
-  template <> const std::vector<int64_t>
-  argparse::get(const arg&,const T&) const;
-  template <> const std::vector<double>
-  argparse::get(const arg&,const T&) const;
-  template <> const std::vector<arg>
-  argparse::get(const arg&,const T&) const;
-
-  template <class T>
-  const std::vector<T>
-  argparse::getall(const arg& name) const
-  {
-    if (!_completed)
-      throw std::runtime_error("arguments are not parsed.");
-
-    std::vector<T> retval;
-    if (_map.find(name) == _map.end())
-      throw std::runtime_error("argument not found.");
-    auto& varr = _map.at(name);
-    for (auto& p : varr)
-      retval.push_back(p.get<T>());
-    return retval;
-  }
-  template <class T>
-  const std::vector<T>
-  argparse::getall(const arg& name, const T& dummy) const
-  {
-    if (!_completed)
-      throw std::runtime_error("arguments are not parsed.");
-
-    std::vector<T> retval;
-    if (_map.find(name) == _map.end())
-      return std::vector<T>({dummy});
-    auto& varr = _map.at(name);
-    for (auto& p : varr)
-      retval.push_back(p.get<T>());
-    return retval;
-  }
-  template <> const std::vector<bool>  argparse::getall(const arg&) const;
-  template <> const std::vector<int64_t>  argparse::getall(const arg&) const;
-  template <> const std::vector<double>  argparse::getall(const arg&) const;
-  template <> const std::vector<arg>  argparse::getall(const arg&) const;
 }
 
 #endif
