@@ -401,40 +401,40 @@ namespace argparse {
   {
     if (nargs() != 0) {
       if (nargs() > 1) {
-        fprintf(output,"%s(%d)", name().c_str(), 0);
+        fprintf(output, "%s(%d)", name().c_str(), 0);
         for (auto i=1; i<nargs(); i++) {
-          fprintf(output," %s(%d)", name().c_str(), i);
+          fprintf(output, " %s(%d)", name().c_str(), i);
         }
       } else if (nargs() == 1){
-        fprintf(output,"%s", name().c_str());
+        fprintf(output, "%s", name().c_str());
       } else {
-        fprintf(output,"%s...", name().c_str());
+        fprintf(output, "%s...", name().c_str());
       }
     }
-    fprintf(output," ");
+    fprintf(output, " ");
   }
 
   void
   positional_argument::explain(FILE* output) const
   {
-    fprintf(output,"  %s [%s", name().c_str(), describe_type());
+    fprintf(output, "  %s [%s", name().c_str(), describe_type());
     for (auto i=1; i<nargs(); i++)
-      fprintf(output,",%s", describe_type());
-    if (nargs() == variable_args) fprintf(output,",...");
-    fprintf(output,"]:\n");
+      fprintf(output, ",%s", describe_type());
+    if (nargs() == variable_args) fprintf(output, ",...");
+    fprintf(output, "]:\n");
     if (comment().size()>0) {
       size_t n = 0;
       int64_t N = comment().size();
       for (auto i=0; i<N; i++) {
         if (n==0) {
-          fprintf(output,"        ");
+          fprintf(output, "        ");
           n += 8;
         }
-        fprintf(output,"%c", comment()[i]);
+        fprintf(output, "%c", comment()[i]);
         n++;
-        if (n==80) { n=0; fprintf(output,"\n"); }
+        if (n==80) { n=0; fprintf(output, "\n"); }
       }
-      if (n!=0) fprintf(output,"\n");
+      if (n!=0) fprintf(output, "\n");
     }
   }
 
@@ -559,74 +559,74 @@ namespace argparse {
     std::vector<arg> _optseqs;     /**< The list of the directives */
 
     /** A help function to display the usage */
-    void show_option(void) const;
+    void show_option(FILE* output=stdout) const;
   };
 
   void
-  optional_argument::show_option(void) const
+  optional_argument::show_option(FILE* output) const
   {
     if (_optseqs.size() > 1) {
-      printf("%s", _optseqs[0].c_str());
+      fprintf(output, "%s", _optseqs[0].c_str());
       for (size_t i=1; i<_optseqs.size(); i++)
-        printf("|%s", _optseqs[i].c_str());
+        fprintf(output, "|%s", _optseqs[i].c_str());
     } else {
-      printf("%s", _optseqs[0].c_str());
+      fprintf(output, "%s", _optseqs[0].c_str());
     }
   }
 
   void
   optional_argument::format(FILE* output) const
   {
-    fprintf(output,"[");
-    if (_optseqs.size()>1) fprintf(output,"{");
-    show_option();
-    if (_optseqs.size()>1) fprintf(output,"}");
+    fprintf(output, "[");
+    if (_optseqs.size()>1) fprintf(output, "{");
+    show_option(output);
+    if (_optseqs.size()>1) fprintf(output, "}");
     if (nargs() != 0) {
       if (nargs() > 1) {
         for (auto i=0; i<nargs(); i++) {
-          fprintf(output," %s(%d)", name().c_str(), i);
+          fprintf(output, " %s(%d)", name().c_str(), i);
         }
       } else if (nargs() == 1){
-        fprintf(output," %s", name().c_str());
+        fprintf(output, " %s", name().c_str());
       } else {
-        fprintf(output," %s...", name().c_str());
+        fprintf(output, " %s...", name().c_str());
       }
     }
-    fprintf(output,"] ");
+    fprintf(output, "] ");
   }
 
   void
   optional_argument::explain(FILE* output) const
   {
-    fprintf(output,"  ");
-    show_option();
+    fprintf(output, "  ");
+    show_option(output);
     if (nargs() != 0) {
       if (nargs() > 1) {
-        fprintf(output," [%s(%d):%s", name().c_str(), 0, describe_type());
+        fprintf(output, " [%s(%d):%s", name().c_str(), 0, describe_type());
         for (auto i=1; i<nargs(); i++) {
-          fprintf(output,",%s(%d):%s", name().c_str(), i, describe_type());
+          fprintf(output, ",%s(%d):%s", name().c_str(), i, describe_type());
         }
       } else if (nargs() == 1) {
-        fprintf(output," [%s:%s", name().c_str(), describe_type());
+        fprintf(output, " [%s:%s", name().c_str(), describe_type());
       } else if (nargs() == variable_args) {
-        fprintf(output," [%s:%s,...", name().c_str(), describe_type());
+        fprintf(output, " [%s:%s,...", name().c_str(), describe_type());
       }
-      fprintf(output,"]");
+      fprintf(output, "]");
     }
-    fprintf(output,":\n");
+    fprintf(output, ":\n");
     if (comment().size()>0) {
       size_t n = 0;
       int64_t N = comment().size();
       for (auto i=0; i<N; i++) {
         if (n==0) {
-          fprintf(output,"        ");
+          fprintf(output, "        ");
           n += 8;
         }
-        fprintf(output,"%c", comment()[i]);
+        fprintf(output, "%c", comment()[i]);
         n++;
-        if (n==80) { n=0; fprintf(output,"\n"); }
+        if (n==80) { n=0; fprintf(output, "\n"); }
       }
-      if (n!=0) fprintf(output,"\n");
+      if (n!=0) fprintf(output, "\n");
     }
   }
 
@@ -646,11 +646,16 @@ namespace argparse {
      * @param[in] argv `argv` given in the main function.
      * @param[in] desc The description of the main program.
      */
-    argparse(const int nargs, const char** argv, arg desc="")
+    argparse(const int nargs, const char** argv,
+             arg desc="", bool with_help=true)
       : _description(desc),_completed(false),_varargs(false),_appname(argv[0])
     {
       for (int i=1; i<nargs; i++)
         _arguments.push_back(arg(argv[i]));
+      if (with_help)
+        _optional_parsers.push_back
+          (optional_argument((args){"-h","--help"}, "help",
+                             value_type::Bool, 0, "Show a help message"));
     }
     /**
      * @brief Create an argument parser instance.
@@ -775,10 +780,12 @@ namespace argparse {
      */
     void add_argument(const arg& name, const value_type type,
                       const int16_t n, const arg& com="") {
+      if (name == "help")
+        throw std::runtime_error("the name \"help\" is predefined.");
       if (_varargs)
         throw std::runtime_error("cannot add any argument after varargs.");
       if (n<0) _varargs = true;
-      _parse_parameters.push_back(positional_argument(name, type, n, com));
+      _positional_parsers.push_back(positional_argument(name, type, n, com));
       _completed = false;
     }
 
@@ -835,10 +842,9 @@ namespace argparse {
     void add_option(const arg& dir,
                     const arg& name, const value_type type,
                     const int16_t n, const arg& com="") {
-      if (_varargs)
-        throw std::runtime_error("cannot add any argument after varargs.");
-      if (n<0) _varargs = true;
-      _parse_options.push_back(optional_argument(dir, name, type, n, com));
+      if (name == "help")
+        throw std::runtime_error("the name \"help\" is predefined.");
+      _optional_parsers.push_back(optional_argument(dir, name, type, n, com));
       _completed = false;
     }
     /**
@@ -852,10 +858,9 @@ namespace argparse {
     void add_option(const std::vector<arg>& dirs,
                     const arg& name, const value_type type,
                     const int16_t n, const arg& com="") {
-      if (_varargs)
-        throw std::runtime_error("cannot add any argument after varargs.");
-      if (n<0) _varargs = true;
-      _parse_options.push_back(optional_argument(dirs, name, type, n, com));
+      if (name == "help")
+        throw std::runtime_error("the name \"help\" is predefined.");
+      _optional_parsers.push_back(optional_argument(dirs, name, type, n, com));
       _completed = false;
     }
   private:
@@ -866,30 +871,32 @@ namespace argparse {
     std::string _appname;         /**< The name of the application */
     std::map<arg, values> _map;   /**< The map of (name, values) */
     std::vector<arg> _arguments;  /**< The array of arguments */
-    std::vector<positional_argument> _parse_parameters;
-    std::vector<optional_argument> _parse_options;
+    std::vector<positional_argument> _positional_parsers;
+    std::vector<optional_argument>   _optional_parsers;
   };
 
 
   void
   argparse::format(FILE* output) const
   {
-    fprintf(output,"%s ", _appname.c_str());
-    for (auto o : _parse_options) o.format();
-    for (auto p : _parse_parameters) p.format();
-    fprintf(output,"\n");
+    fprintf(output, "%s ", _appname.c_str());
+    for (auto o : _optional_parsers) if (o.nargs()==0) o.format(output);
+    for (auto o : _optional_parsers) if (o.nargs()>0) o.format(output);
+    for (auto p : _positional_parsers) p.format(output);
+    for (auto o : _optional_parsers) if (o.nargs()<0) o.format(output);
+    fprintf(output, "\n");
   }
 
   void
   argparse::explain(FILE* output) const
   {
-    if (_parse_parameters.size()>0) {
-      fprintf(output,"\nArguments\n");
-      for (auto p : _parse_parameters) p.explain();
+    if (_positional_parsers.size()>0) {
+      fprintf(output, "\nArguments\n");
+      for (auto p : _positional_parsers) p.explain(output);
     }
-    if (_parse_options.size()>0) {
-      fprintf(output,"\nOptions\n");
-      for (auto o : _parse_options) o.explain();
+    if (_optional_parsers.size()>0) {
+      fprintf(output, "\nOptions\n");
+      for (auto o : _optional_parsers) o.explain(output);
     }
   }
 
@@ -897,45 +904,46 @@ namespace argparse {
   argparse::show_help(FILE* output, const bool simple) const
   {
     if (_description.size() > 0)
-      fprintf(output,"%s\n\n", _description.c_str());
-    fprintf(output,"usage:\n  ");
-    format();
-    if (!simple) explain();
+      fprintf(output, "%s\n\n", _description.c_str());
+    fprintf(output, "usage:\n  ");
+    format(output);
+    if (!simple) explain(output);
   }
 
   void
   argparse::display_status(FILE* output) const
   {
-    fprintf(output,"# input arguments:");
-    for (auto s : _arguments) fprintf(output," %s", s.c_str());
-    fprintf(output,"\n");
-    fprintf(output,"# defined options: ");
-    for (auto o : _parse_options) o.format();
-    fprintf(output,"\n");
-    fprintf(output,"# named arguments: ");
-    for (auto p : _parse_parameters) p.format();
-    fprintf(output,"\n");
-    fprintf(output,"# parsed arguments:\n");
+    fprintf(output, "# input arguments:");
+    for (auto s : _arguments) fprintf(output, " %s", s.c_str());
+    fprintf(output, "\n");
+    fprintf(output, "# defined options: ");
+    for (auto o : _optional_parsers) o.format(output);
+    fprintf(output, "\n");
+    fprintf(output, "# named arguments: ");
+    for (auto p : _positional_parsers) p.format(output);
+    fprintf(output, "\n");
+    fprintf(output, "# parsed arguments:\n");
     for (auto m : _map) {
       auto& name = m.first;
       auto& val  = m.second;
-      fprintf(output,"    %s:", name.c_str());
+      fprintf(output, "    %s:", name.c_str());
       for (auto v : val) {
         switch (v.type()) {
         case value_type::Null:
-          fprintf(output," null"); break;
+          fprintf(output, " null"); break;
         case value_type::Bool:
-          fprintf(output," %s", (v.get<bool>()==true?"true":"false")); break;
+          fprintf(output, " %s", (v.get<bool>()==true?"true":"false")); break;
         case value_type::Integer:
-          fprintf(output," %ld", v.get<int64_t>()); break;
+          fprintf(output, " %ld", v.get<int64_t>()); break;
         case value_type::Float:
-          fprintf(output," %lf", v.get<double>()); break;
+          fprintf(output, " %lf", v.get<double>()); break;
         case value_type::String:
-          fprintf(output," %s", v.get<arg>().c_str()); break;
+          fprintf(output, " %s", v.get<arg>().c_str()); break;
         }
       }
-      fprintf(output,"\n");
+      fprintf(output, "\n");
     }
+    fprintf(output, "\n");
   }
 
   template <class T>
@@ -991,8 +999,13 @@ namespace argparse {
   argparse::parse(const bool help_on_error,
                   const bool show_help_and_exit)
   {
+    auto optsort =
+      [] (const optional_argument &a, const optional_argument &b)
+      { return a.nargs()>b.nargs(); };
+    auto& _pp = _positional_parsers;
+    auto& _op = _optional_parsers;
     std::vector<arg> _remaining;
-
+    //std::sort(_op.begin(), _op.end(), optsort);
     try {
       {
         /**
@@ -1003,7 +1016,7 @@ namespace argparse {
         auto vp = _arguments.begin();
         while (vp != _arguments.end()) {
           bool _updated(false);
-          for (auto o : _parse_options) {
+          for (auto& o : _op) {
             const auto& size = o.nargs();
             const auto& name = o.name();
             const auto& type = o.type();
@@ -1023,6 +1036,8 @@ namespace argparse {
                 _map.insert(argument(name,v));
               } else if (size == variable_args) {
                 while (vp != _arguments.end()) {
+                  auto q = std::find(_op.begin(),_op.end(), *vp);
+                  if (q != _op.end()) break;
                   v.push_back(value(type, *vp)); vp++;
                 }
                 _map.insert(argument(name,v));
@@ -1043,8 +1058,8 @@ namespace argparse {
          * std::runtime_error immediately.
          */
         auto vp = _remaining.begin();
-        auto ip = _parse_parameters.begin();
-        while (ip != _parse_parameters.end()) {
+        auto ip = _pp.begin();
+        while (ip != _pp.end()) {
           if (vp == _remaining.end())
             throw std::runtime_error("insufficient number of arguments");
 
@@ -1077,25 +1092,26 @@ namespace argparse {
     } catch (std::runtime_error e) {
       /**
        * If `help_on_error` is set `true`, `parse()` function catches any
-       * exception, displays a detailed help message, and exits.
+       * exception, displays a simplified help message, and exits.
        */
       if (help_on_error) {
-        show_help(stderr, false);
-        fprintf(stderr, "\nerror: %s\n", e.what());
-        exit(EXIT_FAILURE);
+        _completed = true; // unlock the `get` function
+        if (get<bool>("help", false)) {
+          show_help(stderr, false);
+          exit(EXIT_SUCCESS);
+        } else {
+          show_help(stderr, true);
+          fprintf(stderr, "\nerror: %s\n", e.what());
+          exit(EXIT_FAILURE);
+        }
       }
       throw;
     }
     /**
      * If `show_help_and_exit` is set `true` and `help` argument is defined,
      * it displays a detailed help message and exits normally.
-     *
-     * @note The value of the `help` argument is not checked here. If you
-     * defined a `help` argument as a positional argument, this function
-     * always displays a help message and exits. Thus, using a positional
-     * argument with the name of `help` is not recommended.
      */
-    if (show_help_and_exit && get<bool>(std::string("help"), false)) {
+    if (show_help_and_exit && get<bool>("help", false)) {
       show_help(stderr, false);
       exit(EXIT_SUCCESS);
     }
